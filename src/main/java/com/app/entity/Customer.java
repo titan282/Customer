@@ -1,6 +1,7 @@
 package com.app.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,8 @@ public class Customer {
 
     private String firstName;
     private String lastName;
+
+    @Email(message = "The email is not a valid email.")
     private String email;
     private String gender;
 

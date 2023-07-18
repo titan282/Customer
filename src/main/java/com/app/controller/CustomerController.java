@@ -2,6 +2,7 @@ package com.app.controller;
 
 import com.app.entity.Customer;
 import com.app.service.CustomerService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api")
@@ -23,10 +26,15 @@ public class CustomerController {
     }
 
     //CRUD
-    @GetMapping("/customers")
-    public List<Customer> findAllCustomers(){
-        List<Customer> allCustomers = customerService.getAllCustomers();
-        return  allCustomers;
+//    @GetMapping("/customers/all")
+//    public List<Customer> findAllCustomers(){
+//        List<Customer> allCustomers = customerService.getAllCustomers();
+//        return  allCustomers;
+//    }
+    //SortAll
+    @GetMapping("/customers/all")
+    public List<Customer> getCustomers(@RequestParam(defaultValue = "id,asc") String[] sort) {
+        return customerService.getCustomersWithSorting(sort);
     }
 
     @GetMapping("/customers/{id}")
@@ -34,9 +42,38 @@ public class CustomerController {
         return customerService.getCustomerById(id);
     }
 
+    //Pagination and Sorting
+    @GetMapping("/customers")
+    public Page<Customer> getCustomersWithPagination(@RequestParam(defaultValue = "1" ) int page,
+                                                     @RequestParam(defaultValue = "5") int limit,
+                                                     @RequestParam(defaultValue = "id,asc") String[] sort){
+        return customerService.getCustomersWithPagination(page, limit,sort);
+    }
+
+
+
+    //Searching
+    @GetMapping("/customers/searching")
+    public List<Customer> getCustomersWithSearching(@RequestParam String pattern) {
+        return customerService.getCustomersWithSearching(pattern);
+    }
+
     @PostMapping("/customers")
-    public List<Customer> addCustomer(@RequestBody List<Customer> customers) {
+    public List<Customer> addCustomer( @RequestBody List<Customer> customers) {
         return customerService.saveCustomers(customers);
+    }
+    @PostMapping("/customer")
+    public Customer addCustomer(@RequestBody Customer customer) {
+//        String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
+//        Pattern pattern = Pattern.compile(regex);
+//        Matcher matcher = pattern.matcher(customer.getEmail());
+//        if(matcher.matches()){
+//           customerService.saveCustomer(customer);
+//           return "The customer has been added";
+//        }else {
+//            return "Invalid email, Please input again";
+//        }
+        return customerService.saveCustomer(customer);
     }
 
     @PutMapping("/customers/{id}")
@@ -54,15 +91,5 @@ public class CustomerController {
         return customerService.deleteAllCustomers();
     }
 
-    //Pagination
-    @GetMapping("/customers/page")
-    public Page<Customer> getCustomersWithPagination(@RequestParam int page, @RequestParam int limit,@RequestParam(name = "sortBy", required = false) String field){
-        return customerService.getCustomersWithPagination(page, limit,field);
-    }
 
-    //Sorting
-    @GetMapping("/customers/sorting")
-    public List<Customer> getCustomersWithSorting(@RequestParam String field) {
-        return customerService.getCustomersWithSorting(field);
-    }
 }

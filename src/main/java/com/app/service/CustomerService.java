@@ -2,15 +2,15 @@ package com.app.service;
 
 import com.app.entity.Customer;
 import com.app.repository.CustomerRepository;
-import org.hibernate.grammars.hql.HqlParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -55,23 +55,59 @@ public class CustomerService {
     }
 
     //Pagination
-    public Page<Customer> getCustomersWithPagination(int page, int limit, String field) {
-        field = field == null ?"id":field;
-        Page<Customer> allCustomers = customerRepository.findAll(PageRequest.of(page, limit, Sort.by(field)));
+    public Page<Customer> getCustomersWithPagination(int page, int limit, String[] sort) {
+
+        List<Sort.Order> orders = new ArrayList<Sort.Order>();
+        if(sort[0].contains(",")){
+            // will sort more than 2 fields
+            // sortOrder="field, direction"
+            // Let split sort
+            for(String sortOrder : sort){
+                String[] _sort = sortOrder.split(",");
+                orders.add(getSortWithFieldAndDirection(_sort[1], _sort[0]));
+            }
+        } else {
+            //sort =[field, direction]
+            // here is the situation only have 1 sort param
+            orders.add(getSortWithFieldAndDirection(sort[1],sort[0]));
+        }
+
+        Pageable pageable = PageRequest.of(page-1, limit, Sort.by(orders));
+        Page<Customer> allCustomers = customerRepository.findAll(pageable);
+        //Need caculate offset = limit*pageIndex -> If want in page 1 GUI, we need pageIndex =0 -> offset = 0*10=0;
         return allCustomers;
     }
 
+    private Sort.Order getSortWithFieldAndDirection(String direction, String field) {
+        Sort.Direction directionObj = direction.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        return new Sort.Order(directionObj, field);
+    }
+
     //Sorting
-    public List<Customer> getCustomersWithSorting(String field){
-        List<Customer> allCustomers =  customerRepository.findAll(Sort.by(field));
+    public List<Customer> getCustomersWithSorting(String[] sort) {
+        List<Sort.Order> orders = new ArrayList<Sort.Order>();
+        if(sort[0].contains(",")){
+            // will sort more than 2 fields
+            // sortOrder="field, direction"
+            // Let split sort
+            for(String sortOrder : sort){
+                String[] _sort = sortOrder.split(",");
+                orders.add(getSortWithFieldAndDirection(_sort[1], _sort[0]));
+            }
+        } else {
+            //sort =[field, direction]
+            // here is the situation only have 1 sort param
+            orders.add(getSortWithFieldAndDirection(sort[1],sort[0]));
+        }
+        List<Customer> allCustomers = customerRepository.findAll(Sort.by(orders));
         return allCustomers;
     }
 
     //Searching
-//    public List<Customer> getCustomersWithSearching(String pattern){
-//        List<Customer> allCustomers =  customerRepository.findAllByFirstNameOrLastNameOrEmailContains(pattern);
-//        return allCustomers;
-//    }
+    public List<Customer> getCustomersWithSearching(String pattern) {
+        List<Customer> allCustomers = customerRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(pattern);
+        return allCustomers;
+    }
 
 
 }
