@@ -46,8 +46,9 @@ public class CustomerController {
     @GetMapping("/customers")
     public Page<Customer> getCustomersWithPagination(@RequestParam(defaultValue = "1" ) int page,
                                                      @RequestParam(defaultValue = "5") int limit,
-                                                     @RequestParam(defaultValue = "id,asc") String[] sort){
-        return customerService.getCustomersWithPagination(page, limit,sort);
+                                                     @RequestParam(defaultValue = "id,asc") String[] sort,
+                                                     @RequestParam(defaultValue = "") String pattern){
+        return customerService.getCustomersWithPagination(page, limit,sort,pattern);
     }
 
 

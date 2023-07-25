@@ -55,7 +55,7 @@ public class CustomerService {
     }
 
     //Pagination
-    public Page<Customer> getCustomersWithPagination(int page, int limit, String[] sort) {
+    public Page<Customer> getCustomersWithPagination(int page, int limit, String[] sort, String pattern) {
 
         List<Sort.Order> orders = new ArrayList<Sort.Order>();
         if(sort[0].contains(",")){
@@ -73,7 +73,7 @@ public class CustomerService {
         }
 
         Pageable pageable = PageRequest.of(page-1, limit, Sort.by(orders));
-        Page<Customer> allCustomers = customerRepository.findAll(pageable);
+        Page<Customer> allCustomers = customerRepository.findByFirstNameContainingOrLastNameContaining(pattern, pattern, pageable);
         //Need caculate offset = limit*pageIndex -> If want in page 1 GUI, we need pageIndex =0 -> offset = 0*10=0;
         return allCustomers;
     }
