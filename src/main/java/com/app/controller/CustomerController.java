@@ -5,7 +5,9 @@ import com.app.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Validated
 @RestController
 @RequestMapping("/api")
 public class CustomerController {
@@ -60,11 +63,15 @@ public class CustomerController {
     }
 
     @PostMapping("/customers")
-    public List<Customer> addCustomer( @RequestBody List<Customer> customers) {
-        return customerService.saveCustomers(customers);
+    public ResponseEntity<String> addCustomer( @RequestBody @Valid List<Customer> customers) {
+//        return customerService.saveCustomers(customers);
+        for (@Valid Customer customer:customers) {
+
+        }
+        return ResponseEntity.ok("User is valid");
     }
     @PostMapping("/customer")
-    public Customer addCustomer(@RequestBody Customer customer) {
+    public ResponseEntity<String> addCustomer(@RequestBody @Valid Customer customer) {
 //        String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
 //        Pattern pattern = Pattern.compile(regex);
 //        Matcher matcher = pattern.matcher(customer.getEmail());
@@ -74,7 +81,9 @@ public class CustomerController {
 //        }else {
 //            return "Invalid email, Please input again";
 //        }
-        return customerService.saveCustomer(customer);
+//        return customerService.saveCustomer(customer);
+        return ResponseEntity.ok("User is valid");
+
     }
 
     @PutMapping("/customers/{id}")
